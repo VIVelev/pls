@@ -5,21 +5,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void ls(path_t *paths, int n,
+/**
+ * Lists command line arguments.
+ * 
+ * @param paths, passed arguments
+ * @param n, the number of arguments
+ * @param display_hidden, wheather to display hidden files
+ * @param long_output, wheather to output detailed information for the files
+ * @param recursive, wheather to traverse directories recursively
+ */
+void ls(path_t *paths, unsigned int n,
         bool display_hidden, bool long_output, bool recursive) {
 
-    /* Sort files */
-    qsort(paths, n, sizeof(path_t), path_comparator);
-
     /* Move dirs to the back of the list */
-    int diridx = push_back_dirs(".", paths, n);
+    unsigned int diridx = push_back_dirs("", paths, n);
+
+    /* Sort files */
+    qsort(paths, diridx, sizeof(path_t), path_comparator);
+
+    /* Sort dirs */
+    qsort(paths + diridx, n - diridx, sizeof(path_t), path_comparator);
 
     /* List files */
     lsfiles("", (const path_t *)paths, diridx, long_output);
 
     bool print_header = n > 1;
     /* Traverse the directories */
-    for (register int i = diridx; i < n; ++i) {
+    for (register unsigned int i = diridx; i < n; ++i) {
         if (print_header) {
             if (diridx != 0 || i > diridx) {
                 printf("\n");

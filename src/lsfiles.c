@@ -15,7 +15,7 @@
  * Private lsunary functions - prototypes                       *
  ****************************************************************/
 
-static char _get_filetype(int m);
+static char _get_filetype(unsigned int m);
 
 static const char *_months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -24,8 +24,16 @@ static const char *_months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
  * Public lsunary functions                                     *
  ****************************************************************/
 
+/**
+ * Lists files (display output to the stdout)
+ * 
+ * @param dirpath, the path to the directory containing the files
+ * @param filepaths, names/paths of the files
+ * @param n, number of files to list
+ * @param long_output, wheather to output detailed information for the files
+ */
 void lsfiles(const path_t dirpath, const path_t *filepaths,
-             int n, bool long_output) {
+             unsigned int n, bool long_output) {
 
     if (n == 0) {
         return;
@@ -36,7 +44,7 @@ void lsfiles(const path_t dirpath, const path_t *filepaths,
         /* Total number of 1024 blocks allocated for the files */
         unsigned long total_blocks = 0;
 
-        for (register int i = 0; i < n; ++i) {
+        for (register unsigned int i = 0; i < n; ++i) {
             path_t fullpath;
             join_paths(dirpath, filepaths[i], fullpath);
 
@@ -50,7 +58,7 @@ void lsfiles(const path_t dirpath, const path_t *filepaths,
         printf("total %lu\n", total_blocks >> 1);
     }
 
-    for (register int i = 0; i < n; ++i) {
+    for (register unsigned int i = 0; i < n; ++i) {
         path_t fullpath;
         join_paths(dirpath, filepaths[i], fullpath);
 
@@ -105,8 +113,6 @@ void lsfiles(const path_t dirpath, const path_t *filepaths,
         }
 
         /* Print file name */
-
-#ifdef COLORED
         if (type == 'd') {
             printf("%s/\n", filepaths[i]);
 
@@ -127,9 +133,6 @@ void lsfiles(const path_t dirpath, const path_t *filepaths,
         } else {
             printf("%s\n", filepaths[i]);
         }
-#else
-        printf("%s\n", filepaths[i]);
-#endif
     }
 }
 
@@ -144,7 +147,7 @@ void lsfiles(const path_t dirpath, const path_t *filepaths,
  * @param m, the stat mode of the file (st.st_mode)
  * @return char, the type
  */
-static char _get_filetype(int m) {
+static char _get_filetype(unsigned int m) {
     if (S_ISREG(m))
         return '-';
     if (S_ISDIR(m))

@@ -6,6 +6,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * Lists all files in a directory and recursively
+ * traverses subdirectories if `recursive` is true.
+ * 
+ * @param parentdir, path to parent directory
+ * @param dirpath, path/name of current directory
+ * @param print_header, whether to print header (path to directory)
+ * @param display_hidden, wheather to display hidden files
+ * @param long_output, wheather to output detailed information for the files
+ * @param recursive, wheather to traverse directories recursively
+ */
 void lsdir(const path_t parentdir, const path_t dirpath, bool print_header,
            bool display_hidden, bool long_output, bool recursive) {
 
@@ -25,7 +36,7 @@ void lsdir(const path_t parentdir, const path_t dirpath, bool print_header,
 
     /* Get all the names of the files in the directory */
     path_t *entries_names = NULL;
-    int nentries = 0;
+    unsigned int nentries = 0;
 
     struct dirent *entry;
     while ((entry = readdir(dir_p)) != NULL) {
@@ -40,13 +51,19 @@ void lsdir(const path_t parentdir, const path_t dirpath, bool print_header,
     }
     closedir(dir_p);
 
+    /* Move dirs to the back of the list */
+    unsigned int diridx = push_back_dirs(fullpath, entries_names, nentries);
+
     /* Sort files */
-    qsort(entries_names, nentries, sizeof(path_t), path_comparator);
+    qsort(entries_names, diridx, sizeof(path_t), path_comparator);
 
-    /* Split files and directories */
-    int diridx = push_back_dirs(fullpath, entries_names, nentries);
+    /* Sort dirs */
+    qsort(entries_names + diridx, nentries - diridx, sizeof(path_t), path_comparator);
 
-    if (print_header || recursive) {
+    if (print_header) {
+        if (!IS_CURR_DIR(fullpath)) {
+            printf("./");
+        }
         printf("%s:\n", fullpath);
     }
 
@@ -54,9 +71,9 @@ void lsdir(const path_t parentdir, const path_t dirpath, bool print_header,
     lsfiles(fullpath, (const path_t *)entries_names, nentries, long_output);
 
     if (recursive) {
-        for (register int i = diridx; i < nentries; ++i) {
+        for (register unsigned int i = diridx; i < nentries; ++i) {
             printf("\n");
-            lsdir(fullpath, entries_names[i], print_header,
+            lsdir(fullpath, entries_names[i], true,
                   display_hidden, long_output, recursive);
         }
     }

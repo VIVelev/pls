@@ -11,6 +11,6 @@
 #define WHITE "\033[37m"
 
 void lsfiles(const path_t dirpath, const path_t *filepaths,
-             int n, bool long_output);
+             unsigned int n, bool long_output);
 
 #endif /* LSFILES_H */
