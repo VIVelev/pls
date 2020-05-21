@@ -25,11 +25,12 @@ void lsdir(const path_t parentdir, const path_t dirpath, bool print_header,
     join_paths(parentdir, dirpath, fullpath);
 
     /* Try to open the directory */
-    errno = 0;
     DIR *dir_p = opendir(fullpath);
-    if (errno != 0) {
-        char msg[sizeof(path_t) + 26];
-        sprintf(msg, "ls: cannot open directory %s", fullpath);
+    if (dir_p == NULL) {
+        char msg_header[] = "ls: cannot open directory %s";
+        char msg[strlen(msg_header) + sizeof(path_t)];
+
+        sprintf(msg, msg_header, fullpath);
         perror((const char *)msg);
         return;
     }
@@ -49,7 +50,10 @@ void lsdir(const path_t parentdir, const path_t dirpath, bool print_header,
             strcpy(entries_names[nentries - 1], entry->d_name);
         }
     }
-    closedir(dir_p);
+    if (closedir(dir_p) == -1) {
+        perror("closedir");
+        return;
+    }
 
     /* Move dirs to the back of the list */
     unsigned int diridx = push_back_dirs(fullpath, entries_names, nentries);
